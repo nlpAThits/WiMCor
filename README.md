@@ -24,4 +24,4 @@ Generate samples for the dataset using the metonymic pairs.
 
 ## License
 
-[MIT](LICENSE)
+[GNU GPLv3](LICENSE)
