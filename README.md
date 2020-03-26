@@ -4,7 +4,7 @@ Code for the paper "A Large Harvested Corpus of Location Metonymy" published in 
 
 ## Data
 
-[WiMCor v1.0](https://kevinalexmathews.github.io/files/wimcor-v1.0.tar.gz)
+[WiMCor](https://kevinalexmathews.github.io/software/)
 
 ## Key dependencies
 
