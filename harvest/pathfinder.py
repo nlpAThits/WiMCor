@@ -1,26 +1,18 @@
 import argparse
-import wikipediaapi
-from bs4 import BeautifulSoup
 from itertools import combinations, product
-import bz2
 import re
-import sys
-import os
 import xml.sax
-import subprocess
 import mwparserfromhell
 from multiprocessing import Pool as Threadpool
 from multiprocessing import cpu_count
 from pebble import ProcessPool
 from concurrent.futures import TimeoutError
 
-from services import get_tic, compute_elapsed_time
 from wiki import get
 from sojourner import matches_association_pair, matches_association_element, get_remote_links, get_remote_summary
 from scrapy import parse_disambiguation_page
 
 '''
-
     This is built using the blog article:
         https://towardsdatascience.com/wikipedia-data-science-working-with-the-worlds-largest-encyclopedia-c08efbac5f5c
 
@@ -41,14 +33,16 @@ from scrapy import parse_disambiguation_page
     '''
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--disamb_file', default='disambiguation_page_titles_uniqsort_unleash', help="List of disambiguation pages")
+parser.add_argument('-disamb_file', default='disambiguation_page_titles_uniqsort_unleash', help="List of disambiguation pages")
+parser.add_argument('-datafile', default='home/mathewkn/metonymy-resolution/harvest-data/disambiguation-pages/apiwikipedia/20190901/enwiki-20190901-pages-articles-multistream.xml.bz2', help='Wikipedia dumps datafile')
+parser.add_argument('-indexfile', default='home/mathewkn/metonymy-resolution/harvest-data/disambiguation-pages/apiwikipedia/20190901/index', help='Wikipedia dumps indexfile')
 parser.add_argument('-vehicles', nargs='+', help="Vehicles")
 parser.add_argument('-targets', nargs='+', help="Targets")
 args = parser.parse_args()
 print(args)
 
-datafile = '/home/mathewkn/metonymy-resolution/harvest-data/disambiguation-pages/apiwikipedia/20190901/enwiki-20190901-pages-articles-multistream.xml.bz2'
-indexfile = '/home/mathewkn/metonymy-resolution/harvest-data/disambiguation-pages/apiwikipedia/20190901/index'
+datafile = args.datafile
+indexfile = args.indexfile
 
 def get_summary(title):
     try:
@@ -125,26 +119,8 @@ def dumps_extractor(disambiguation_page_title):
     return
 
 if __name__=="__main__":
-    tic = get_tic()
-
-    with open('/home/mathewkn/metonymy-resolution/harvest-data/disambiguation-pages/apiwikipedia/{}'.format(args.disamb_file)) as fp:
+    with open(args.disamb_file) as fp:
         disambiguation_page_titles = fp.readlines()
-
-    '''
-    for disambiguation_page_title in disambiguation_page_titles[400:]:
-        dumps_extractor(disambiguation_page_title)
-    '''
-
-    '''
-    # Create a threadpool for reading in files
-    threadpool = Threadpool(cpu_count())
-
-    # Read in the files as a list of lists
-    results = threadpool.map(dumps_extractor, disambiguation_page_titles)
-
-    threadpool.close()
-    threadpool.join()
-    '''
 
     # https://stackoverflow.com/questions/44402085/multiprocessing-map-over-list-killing-processes-that-stall-above-timeout-limi/44404854
     with ProcessPool(cpu_count()) as pool:
@@ -160,4 +136,3 @@ if __name__=="__main__":
             except TimeoutError as error:
                 print("function took longer than %d seconds" % error.args[1])
 
-    compute_elapsed_time(tic)

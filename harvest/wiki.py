@@ -97,7 +97,7 @@ def get(datafile, indexfile, query=None, raw=False):
     dec = bz2.BZ2Decompressor()
     df = open(datafile, "rb")
     df.seek(found)
-    
+
 
     class Parser(object):
         def __init__(self):
@@ -124,7 +124,7 @@ def get(datafile, indexfile, query=None, raw=False):
                 self.title += data
             elif self.stack[-1] == "text":
                 self.text += data
-        
+
 
     target = Parser()
     parser = XMLParser(target=target)
@@ -137,7 +137,7 @@ def get(datafile, indexfile, query=None, raw=False):
     if not raw:
         text = markup.change(text)
     return target.title, text
-    
+
 
 def main():
     cmd = sys.argv[1]
@@ -158,6 +158,3 @@ def main():
     else:
         usage()
 
-
-if __name__ == "__main__":
-    main()

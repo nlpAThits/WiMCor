@@ -1,15 +1,10 @@
 import re
-import sys
 import wikipediaapi
 from SPARQLWrapper import SPARQLWrapper, JSON
-from bs4 import BeautifulSoup
 from itertools import combinations, product
-from multiprocessing import Pool as Threadpool
-from multiprocessing import cpu_count
-
-from services import get_tic, compute_elapsed_time
 
 en_wiki = wikipediaapi.Wikipedia(language='en', extract_format=wikipediaapi.ExtractFormat.WIKI)
+
 '''
 DBpedia endpoints:
    http://dbpedia-live.openlinksw.com/sparql

@@ -16,6 +16,10 @@ Code for the paper "A Large Harvested Corpus of Location Metonymy" published in 
 
 ## Running the code (WIP!)
 
+1. Generate metonymic pairs
+
+```python pathfinder.py -disamb_file ./disambiguation_page_titles_uniqsort-test -vehicles 'PopulatedPlace' -targets 'Q3918'```
+
 ## License
 
 [GNU GPLv3](LICENSE)

@@ -1,9 +1,5 @@
 from bs4 import BeautifulSoup
-import sys
 import requests
-from services import get_tic, compute_elapsed_time
-from multiprocessing import Pool as Threadpool
-from multiprocessing import cpu_count
 
 session = requests.Session()
 url = "https://en.wikipedia.org/w/api.php"
@@ -28,7 +24,7 @@ def parse_disambiguation_page(title):
     except Exception: # Page not found
         return []
 
-    soup = BeautifulSoup(content, 'html.parser')    
+    soup = BeautifulSoup(content, 'html.parser')
     wikilinks = []
 
     try:
@@ -68,15 +64,3 @@ def parse_disambiguation_page(title):
 
     return wikilinks
 
-if __name__=="__main__":   
-    tic = get_tic()
-
-    with open('/home/mathewkn/metonymy-resolution/harvest-data/disambiguation-pages/apiwikipedia/disambiguation_page_titles_uniqsort') as fp:
-        disambiguation_page_titles = fp.readlines()
-
-    disambiguation_page_titles = [title.strip() for title in disambiguation_page_titles] 
-
-    for title in disambiguation_page_titles:
-        parse_disambiguation_page(title)
-
-    compute_elapsed_time(tic)
