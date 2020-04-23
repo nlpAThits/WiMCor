@@ -12,7 +12,8 @@ Code for the paper "A Large Harvested Corpus of Location Metonymy" published in 
 
 ```$ python pathfinder.py -disamb_file ./disambiguation_page_titles -vehicles 'PopulatedPlace' -targets 'Q3918'```
 
-where `disamb_file` is a file consisting of titles of Wikipedia disambiguation pages, one per line. 
+where `disamb_file` is a file consisting of titles of Wikipedia disambiguation pages, one per line.
+This command extracts the metonymic pair of titles that are of the form `<vehicle>-for-<target>`.
 
 ## License
 
