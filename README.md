@@ -6,14 +6,6 @@ Code for the paper "A Large Harvested Corpus of Location Metonymy" published in 
 
 [WiMCor](https://kevinalexmathews.github.io/software/)
 
-## Key dependencies
-
-* ``wikipediaapi``
-* ``mwparserfromhell``
-* ``BeautifulSoup``
-* ``SPARQLWrapper``
-* ``SpaCy``
-
 ## Running the code (WIP!)
 
 1. Generate metonymic pairs
