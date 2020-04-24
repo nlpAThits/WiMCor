@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import sys
 import requests
+import argparse
 from bs4 import BeautifulSoup
 from bs4 import Tag
 from bs4 import NavigableString
@@ -9,13 +10,19 @@ from multiprocessing import cpu_count
 from multiprocessing import Lock
 import random
 import spacy
-from services import get_tic, compute_elapsed_time
 
 nlp = spacy.load('en_core_web_sm')
 s = requests.Session()
 url = 'https://en.wikipedia.org/w/api.php'
-directory = sys.argv[1]
-num_backlinks = sys.argv[2]
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-directory', default='./', help="Directory containing output of processed log")
+parser.add_argument('-num_backlinks', default=5000, type=int, help='Number of backlinks to be processed')
+args = parser.parse_args()
+print(args)
+
+directory = args.directory
+num_backlinks = args.num_backlinks
 
 def get_text(title):
     '''
@@ -128,9 +135,9 @@ def generate_sample(text, target_page_title, anchor_text, label, cat):
         lc = nlp(left_context)[:det_index]
         if nlp(left_context)[det_index+1:]:
             lc = '{} {}'.format(lc, nlp(left_context)[det_index+1:])
-        sample = '<sample>{} <pmw target=\'{}\' label=\'{}\' category=\'{}\'>{}</pmw>{}</sample>'.format(lc, target_page_title, label, cat, anchor_text, right_context)
+        sample = '<sample>{} <pmw coarse=\'{}\' medium=\'{}\' fine=\'{}\'>{}</pmw>{}</sample>'.format(lc, label, cat, target_page_title, anchor_text, right_context)
     else:
-        sample = '<sample>{} <pmw target=\'{}\' label=\'{}\' category=\'{}\'>{}</pmw>{}</sample>'.format(left_context, target_page_title, label, cat, anchor_text, right_context)
+        sample = '<sample>{} <pmw coarse=\'{}\' medium=\'{}\' fine=\'{}\'>{}</pmw>{}</sample>'.format(left_context, label, cat, target_page_title, anchor_text, right_context)
 
     return sample
 
@@ -210,7 +217,6 @@ def extractor(line):
     return
 
 if __name__=="__main__":
-    tic = get_tic()
 
     with open('{}anchors'.format(directory)) as fp:
         anchors = fp.readlines()
@@ -237,4 +243,3 @@ if __name__=="__main__":
     threadpool.close()
     threadpool.join()
 
-    compute_elapsed_time(tic)

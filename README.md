@@ -15,6 +15,12 @@ Code for the paper "A Large Harvested Corpus of Location Metonymy" published in 
 where `disamb_file` is a file consisting of titles, one per line, of Wikipedia disambiguation pages.
 This command extracts metonymic pairs of the form `<vehicle>-for-<target>` from the offline version (XML dumps) and the online version (MediaWiki).
 
+2. Generate samples
+
+```$ python gen_samples.py -directory ./```
+
+where `directory` denotes the directory having the output of log processed by `process-log.sh`.
+This command generates the annotated samples in XML format.
 
 ## Cite the paper
 
