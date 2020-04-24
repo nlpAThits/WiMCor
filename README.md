@@ -13,7 +13,12 @@ Code for the paper "A Large Harvested Corpus of Location Metonymy" published in 
 ```$ python -u gen_metpairs.py -disamb_file ./disambiguation_page_titles -vehicles 'PopulatedPlace' -targets 'Q3918'```
 
 where `disamb_file` is a file consisting of titles, one per line, of Wikipedia disambiguation pages.
-This command extracts metonymic pairs of the form `<vehicle>-for-<target>` from the offline version (XML dumps) and the online version (MediaWiki).
+This command extracts metonymic pairs of the form `<vehicle>-for-<target>` from the offline version (XML dumps) and the online version (MediaWiki). 
+Check out 
+[here](https://wiki.dbpedia.org/services-resources/datasets/dbpedia-datasets#h434-6),
+[here](http://dbpedia.org/sparql?default-graph-uri=http%3A%2F%2Fdbpedia.org&query=SELECT+DISTINCT+%3Fcategory%0D%0AWHERE+%7B%3Farticle+rdf%3Atype+%3Fcategory+.%7D%0D%0ALIMIT+1000000&format=text%2Fhtml&CXML_redir_for_subjs=121&CXML_redir_for_hrefs=&timeout=30000&debug=on&run=+Run+Query+)
+and 
+[here](https://www.wikidata.org/wiki/Wikidata:Item_classification) for different types of categories that can be used as vehicles and targets.
 
 2. Generate samples
 
