@@ -19,7 +19,7 @@ This command extracts metonymic pairs of the form `<vehicle>-for-<target>` from 
 
 ```$ python gen_samples.py -directory ./```
 
-where `directory` denotes the directory having the output of log processed by `process-log.sh`.
+where `directory` denotes the directory having the output of list of metonymic pairs processed by `process-pairs.sh`.
 This command generates the annotated samples in XML format.
 
 ## Cite the paper
