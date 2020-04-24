@@ -10,7 +10,7 @@ Code for the paper "A Large Harvested Corpus of Location Metonymy" published in 
 
 1. Generate metonymic pairs
 
-```$ python pathfinder.py -disamb_file ./disambiguation_page_titles -vehicles 'PopulatedPlace' -targets 'Q3918'```
+```$ python -u gen_metpairs.py -disamb_file ./disambiguation_page_titles -vehicles 'PopulatedPlace' -targets 'Q3918'```
 
 where `disamb_file` is a file consisting of titles, one per line, of Wikipedia disambiguation pages.
 This command extracts metonymic pairs of the form `<vehicle>-for-<target>` from the offline version (XML dumps) and the online version (MediaWiki).

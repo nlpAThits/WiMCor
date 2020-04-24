@@ -9,7 +9,7 @@ from pebble import ProcessPool
 from concurrent.futures import TimeoutError
 
 from wiki import get
-from sojourner import matches_association_pair, matches_association_element, get_remote_links, get_remote_summary
+from remote_wiki_access import matches_association_pair, matches_association_element, get_remote_links, get_remote_summary
 from scrapy import parse_disambiguation_page
 
 '''
