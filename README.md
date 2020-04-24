@@ -6,7 +6,7 @@ Code for the paper "A Large Harvested Corpus of Location Metonymy" published in 
 
 [WiMCor](https://kevinalexmathews.github.io/software/)
 
-## Run the code (WIP!)
+## Run the code
 
 1. Generate metonymic pairs
 
@@ -21,6 +21,10 @@ This command extracts metonymic pairs of the form `<vehicle>-for-<target>` from 
 
 where `directory` denotes the directory having the output of list of metonymic pairs processed by `process-pairs.sh`.
 This command generates the annotated samples in XML format.
+
+3. Run baselines (WIP!)
+
+The scripts are available in the directories `glove/` and `bert/`.
 
 ## Cite the paper
 
