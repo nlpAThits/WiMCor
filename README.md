@@ -8,7 +8,12 @@ Code for the paper "A Large Harvested Corpus of Location Metonymy" published in 
 
 ## Run the code
 
-1. Generate metonymic pairs
+1. Generate samples
+
+The scripts are available in the directory `harvest/`. 
+
+First, generate metonymic pairs with the command:
+
 
 ```$ python -u gen_metpairs.py -disamb_file ./disambiguation_page_titles -vehicles 'PopulatedPlace' -targets 'Q3918'```
 
@@ -20,14 +25,14 @@ Check out
 and 
 [here](https://www.wikidata.org/wiki/Wikidata:Item_classification) for different types of categories that can be used as vehicles and targets.
 
-2. Generate samples
+Then generate samples using the command:
 
 ```$ python gen_samples.py -directory ./```
 
 where `directory` denotes the directory having the output of list of metonymic pairs processed by `process-pairs.sh`.
 This command generates the annotated samples in XML format.
 
-3. Run baselines
+3. Run GloVe and BERT baselines
 
 The scripts are available in the directories `glove/` and `bert/`.
 These scripts are based on [Minimalist Location Metonymy Resolution](https://github.com/milangritta/Minimalist-Location-Metonymy-Resolution)  published at ACL 2017.
