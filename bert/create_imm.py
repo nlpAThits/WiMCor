@@ -4,13 +4,14 @@ import codecs
 from spacy.lang.en import English
 import spacy
 import numpy as np
-import h5py
 
 import argparse
 import torch
 from torch.nn.functional import pad as torch_pad
 from pytorch_pretrained_bert import BertTokenizer
 from pytorch_pretrained_bert import BertModel
+
+from create_prewin import dump_to_hdf5
 
 def locate_entity(document, ent, left_w, right_w):
     left_w = '' if len(left_w) == 0 else left_w[-1].text
@@ -22,12 +23,6 @@ def locate_entity(document, ent, left_w, right_w):
                 if right_w == '' or document[index + len(ent)].text == right_w:
                     return index + len(ent) - 1
     raise Exception()  # If this is ever triggered, there are problems parsing the text. Check SpaCy output!
-
-
-def find_start(old):
-    while old.dep_ == "conj":
-        old = old.head
-    return old.head
 
 
 def pad(coll, from_left, seq_length):
@@ -50,35 +45,7 @@ def bert_pad(coll, from_left, seq_length):
             coll = torch_pad(coll, [0, 0, 0, 1], mode='constant', value=0)
     return coll
 
-def dump_to_hdf5(file, out):
-    dep_lefts, bert_lefts, dep_rights, bert_rights, labels = [], [], [], [], []
-    for row in out:
-        dep_lefts.append(row[1])
-        bert_lefts.append(row[2].numpy())
-        dep_rights.append(row[4])
-        bert_rights.append(row[5].numpy())
-        labels.append(row[6])
-
-    '''
-        SpaCy dependency tags are string encoded in unicode (Python 3 type: str).
-
-        Read the section linked below for info on writing encoded string.
-        http://docs.h5py.org/en/latest/strings.html#exceptions-for-python-3
-    '''
-    dep_lefts = np.array(dep_lefts, dtype='S10')
-    dep_rights = np.array(dep_rights, dtype='S10')
-
-    with h5py.File(file, 'w') as f:
-        dt = h5py.string_dtype(encoding='utf-8')
-        f.create_dataset('dep_lefts', data=dep_lefts, dtype=dt, compression='gzip', compression_opts=9)
-        f.create_dataset('bert_lefts', data=bert_lefts, dtype=np.float32, compression='gzip', compression_opts=9)
-        f.create_dataset('dep_rights', data=dep_rights, dtype=dt, compression='gzip', compression_opts=9)
-        f.create_dataset('bert_rights', data=bert_rights, dtype=np.float32, compression='gzip', compression_opts=9)
-        f.create_dataset('labels', data=labels, dtype=np.uint8, compression='gzip', compression_opts=9)
-
-    return
-
-def prewin(path):
+def imm(path):
     dirname = os.path.dirname(path)
     name = os.path.basename(path)
     rawname = os.path.splitext(name)[0] # without extension
@@ -87,7 +54,7 @@ def prewin(path):
         label = 0
     else:
         if 'met' in name or 'metonymic' in name or 'mixed' in name:
-            label = 1 # 1 is for METONYMY/NON-LITERAL, 0 is for LITERAL
+             label = 1 # 1 is for METONYMY/NON-LITERAL, 0 is for LITERAL
         elif 'INSTITUTE' in name:
             label = 1
         elif 'TEAM' in name:
@@ -109,7 +76,7 @@ def prewin(path):
     # Germany<SEP>Their privileges as permanent Security Council members, especially the right of veto, 
     # had been increasingly questioned by <ENT>Germany<ENT> and Japan which, as major economic powers.
     out = []
-    seq_length = 5  # A window of 5 is the DEFAULT for the PUBLICATION methodology. Feel free to experiment.
+    seq_length = 10  # There are THREE baselines in the paper (5, 10, 50) so use this integer to set it.
 
     for line in inp:
         line = line.split(u"<SEP>")
@@ -118,7 +85,7 @@ def prewin(path):
         en_doc = en_nlp(u"".join(sentence).strip())
         words = []
         index = locate_entity(en_doc, entity, spacy_tokenizer(sentence[0].strip()), spacy_tokenizer(sentence[2].strip()))
-        start = find_start(en_doc[index])
+        start = en_doc[index]
 
         # --------------------------------------------------------------------
         # Token map will be an int -> int mapping
@@ -191,33 +158,15 @@ def prewin(path):
         assert (len(cond_bert_emb) == len(en_doc))
         # --------------------------------------------------------------------
 
-        left = seq_length * ["0.0"]
-        right = seq_length * ["0.0"]
-        dep_left = seq_length * ["0.0"]
-        dep_right = seq_length * ["0.0"]
-        bert_left = torch.zeros((seq_length, bert_emb_length))
-        bert_right = torch.zeros_like(bert_left)
+        right = pad([t.text for t in en_doc[start.i + 1:][:seq_length]], False, seq_length)
+        left = pad([t.text for t in en_doc[:index - len(entity) + 1][-seq_length:]], True, seq_length)
 
-        if start.i > index:
-            if index + 1 < len(en_doc) and en_doc[index + 1].dep_ in [u"case", u"compound", u"amod"] \
-                    and en_doc[index + 1].head == en_doc[index]:  # any neighbouring word that links to it
-                right = pad([en_doc[index + 1].text] + [t.text for t in en_doc[start.i:][:seq_length - 1]], False, seq_length)
-                dep_right = pad([en_doc[index + 1].dep_] + [t.dep_ for t in en_doc[start.i:]][:seq_length - 1], False, seq_length)
-                bert_right = bert_pad(torch.cat((torch.unsqueeze(cond_bert_emb[index + 1], 0), cond_bert_emb[start.i:][:seq_length - 1])), False, seq_length)
-            else:
-                right = pad([t.text for t in en_doc[start.i:][:seq_length]], False, seq_length)
-                dep_right = pad([t.dep_ for t in en_doc[start.i:]][:seq_length], False, seq_length)
-                bert_right = bert_pad(cond_bert_emb[start.i:][:seq_length], False, seq_length)
-        else:
-            if index - len(entity) >= 0 and en_doc[index - len(entity)].dep_ in [u"case", u"compound", u"amod"] \
-                    and en_doc[index - len(entity)].head == en_doc[index]:  # any neighbouring word that links to it
-                left = pad([t.text for t in en_doc[:start.i + 1][-(seq_length - 1):]] + [en_doc[index - len(entity)].text], True, seq_length)
-                dep_left = pad([t.dep_ for t in en_doc[:start.i + 1]][-(seq_length - 1):] + [en_doc[index - len(entity)].dep_], True, seq_length)
-                bert_left = bert_pad(torch.cat((cond_bert_emb[:start.i + 1][-(seq_length - 1):], torch.unsqueeze(cond_bert_emb[index - len(entity)], 0))), True, seq_length)
-            else:
-                left = pad([t.text for t in en_doc[:start.i + 1][-seq_length:]], True, seq_length)
-                dep_left = pad([t.dep_ for t in en_doc[:start.i + 1]][-seq_length:], True, seq_length)
-                bert_left = bert_pad(cond_bert_emb[:start.i + 1][-seq_length:], True, seq_length)
+        dep_right = pad([t.dep_ for t in en_doc[start.i + 1:]][:seq_length], False, seq_length)
+        dep_left = pad([t.dep_ for t in en_doc[:index - len(entity) + 1]][-seq_length:], True, seq_length)
+
+        bert_right = bert_pad(cond_bert_emb[start.i + 1:][:seq_length], False, seq_length)
+        bert_left = bert_pad(cond_bert_emb[:index - len(entity) + 1][-seq_length:], True, seq_length)
+
         assert(bert_left.shape == bert_right.shape)
         assert(len(left) == len(dep_left) == len(bert_left))
         assert(len(right) == len(dep_right) == len(bert_right))
@@ -228,4 +177,4 @@ def prewin(path):
         #print(label)
         #print(line[1])
     print("Processed:{} lines/sentences.".format(len(out)))
-    dump_to_hdf5("{}/bert_pickles/{}.hdf5".format(dirname, rawname), out)
+    dump_to_hdf5("{}/bert_pickles/{}_base.hdf5".format(dirname, rawname), out)

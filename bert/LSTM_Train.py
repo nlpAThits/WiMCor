@@ -1,4 +1,3 @@
-import sys
 import codecs
 import random
 import re
@@ -8,14 +7,18 @@ import h5py
 
 import torch
 from keras.callbacks import ModelCheckpoint
-from keras.layers import Embedding, TimeDistributed, Flatten, Concatenate, Dense, Dropout, LSTM, Input, concatenate
-from keras.models import Sequential, Model
+from keras.layers import Embedding
+from keras.layers import TimeDistributed
+from keras.layers import Flatten
+from keras.layers import Dense
+from keras.layers import Dropout
+from keras.layers import LSTM
+from keras.layers import Input
+from keras.layers import concatenate
+from keras.models import Model
 from tensorflow.contrib.keras.api.keras.initializers import Constant
 
-# np.random.seed(133)
-# random.seed(133)
-
-from stats import load_from_pickle, dump_to_pickle
+from utils import load_from_pickle, dump_to_pickle
 
 BERT_DIMENSIONS = 768
 
@@ -31,66 +34,28 @@ def load_from_hdf5(file):
         out.append((dep_left, bert_left, dep_right, bert_right, label))
     return out
 
-def train(choice, dirname, val_split, window=None):
+def train(choice, dirname, window):
     #  --------------------------------------------------------------------------------------------------------------------
     dimensionality = BERT_DIMENSIONS  # No need to adjust, unless you want to experiment with custom embeddings
     print("Dimensionality:", dimensionality)
-    # Remember to choose the CORRECT file names below otherwise you will see bad things happen :-)
-    if choice=='spval' or choice=='spbaseval' or choice=='sptest' or choice=='spbasetest':
-        base = ''
-        if choice=='spbaseval' or choice=='spbasetest':
-            base = '_base'
-        style = 'train'
-        seq_length = window  # Adjust to 5 for PreWin and 5, 10, 50 for baseline results
 
-        neg = load_from_pickle("{}/semeval_metonymic_{}{}.pkl".format(dirname, style, base))
-        ne.extend(load_from_pickle("{}/semeval_mixed_{}{}.pkl".format(dirname, style, base)))
-        pos = load_from_pickle("{}/semeval_literal_{}{}.pkl".format(dirname, style, base))
-    elif choice=='rcval' or choice=='rcbaseval' or choice=='rctest' or choice=='rcbasetest':
+    if choice=='imm':
+        base = '_base'
+    elif choice=='prewin':
         base = ''
-        if choice=='rcbaseval' or choice=='rcbasetest':
-            base = '_base'
-        style = 'train'
-        seq_length = window  # Adjust to 5 for PreWin and 5, 10, 50 for baseline results
+    style = 'train'
+    mlmr_dir = dirname
+    seq_length = window  # Adjust to 5 for PreWin and 5, 10, 50 for baseline results
 
-        neg = load_from_pickle("{}/relocar_metonymic_train{}.pkl".format(dirname, base))
-        pos = load_from_pickle("{}/relocar_literal_train{}.pkl".format(dirname, base))
-    elif choice=='orgval' or choice=='orgbaseval' or choice=='orgtest' or choice=='orgbasetest':
-        base = ''
-        if choice=='orgbaseval' or choice=='orgbasetest':
-            base = '_base'
-        style = 'train'
-        seq_length = window  # Adjust to 5 for PreWin and 5, 10, 50 for baseline results
+    neg = load_from_hdf5("{}/wiki_LOCATION_{}{}.hdf5".format(mlmr_dir, style, base))
+    pos= load_from_hdf5("{}/wiki_INSTITUTE_{}{}.hdf5".format(mlmr_dir, style, base))
+    if path.exists("{}/wiki_EVENT_{}{}.hdf5".format(mlmr_dir, style, base)):
+        pos.extend(load_from_hdf5("{}/wiki_EVENT_{}{}.hdf5".format(mlmr_dir, style, base)))
+    if path.exists("{}/wiki_TEAM_{}{}.hdf5".format(mlmr_dir, style, base)):
+        pos.extend(load_from_hdf5("{}/wiki_TEAM_{}{}.hdf5".format(mlmr_dir, style, base)))
+    if path.exists("{}/wiki_ARTIFACT_{}{}.hdf5".format(mlmr_dir, style, base)):
+        pos.extend(load_from_hdf5("{}/wiki_ARTIFACT_{}{}.hdf5".format(mlmr_dir, style, base)))
 
-        neg = load_from_pickle("{}/org_metonymic_train{}.pkl".format(dirname, base))
-        neg.extend(load_from_pickle("{}/org_mixed_train{}.pkl".format(dirname, base)))
-        pos = load_from_pickle("{}/org_literal_train{}.pkl".format(dirname, base))
-    elif choice=='wkbinaryval' or choice=='wkbinarybaseval' or choice=='wkbinarytest' or choice=='wkbinarybasetest':
-        base = ''
-        if choice=='wkbinarybaseval' or choice=='wkbinarybasetest':
-            base = '_base'
-        style = 'train'
-        mlmr_dir = '{}/bert_pickle'.format(dirname)
-        seq_length = window  # Adjust to 5 for PreWin and 5, 10, 50 for baseline results
-
-        neg = load_from_hdf5("{}/wiki_met_{}{}.hdf5".format(dirname, style, base))
-        pos = load_from_hdf5("{}/wiki_lit_{}{}.hdf5".format(dirname, style, base))
-    elif choice=='wkmultiprewval' or choice=='wkmultibaseval' or choice=='wkmultiprewtest' or choice=='wkmultibasetest':
-        base = ''
-        if choice=='wkmultibaseval' or choice=='wkmultibasetest':
-            base = '_base'
-        style = 'train'
-        mlmr_dir = '{}/bert_pickle'.format(dirname)
-        seq_length = window  # Adjust to 5 for PreWin and 5, 10, 50 for baseline results
-
-        neg = load_from_hdf5("{}/wiki_INSTITUTE_{}{}.hdf5".format(mlmr_dir, style, base))
-        if path.exists("{}/wiki_EVENT_{}{}.hdf5".format(mlmr_dir, style, base)):
-            neg.extend(load_from_hdf5("{}/wiki_EVENT_{}{}.hdf5".format(mlmr_dir, style, base)))
-        if path.exists("{}/wiki_TEAM_{}{}.hdf5".format(mlmr_dir, style, base)):
-            neg.extend(load_from_hdf5("{}/wiki_TEAM_{}{}.hdf5".format(mlmr_dir, style, base)))
-        if path.exists("{}/wiki_ARTIFACT_{}{}.hdf5".format(mlmr_dir, style, base)):
-            neg.extend(load_from_hdf5("{}/wiki_ARTIFACT_{}{}.hdf5".format(mlmr_dir, style, base)))
-        pos = load_from_hdf5("{}/wiki_LOCATION_{}{}.hdf5".format(mlmr_dir, style, base))
     print("Sequence Length: 2 times ", seq_length)
 
     A = []
@@ -111,8 +76,8 @@ def train(choice, dirname, val_split, window=None):
         Y.append(a[4])
 
     print('No of training examples: ', len(D_L))
-    dump_to_pickle("bert_pickle/dep_labels.pkl", dep_labels)
-    dep_labels = load_from_pickle("bert_pickle/dep_labels.pkl")
+    dump_to_pickle("dep_labels.pkl", dep_labels)
+    dep_labels = load_from_pickle("dep_labels.pkl")
     #  --------------------------------------------------------------------------------------------------------------------
     print("Building sequences...")
 
@@ -178,6 +143,6 @@ def train(choice, dirname, val_split, window=None):
     merged_model.compile(loss='categorical_crossentropy', optimizer='adagrad', metrics=['accuracy'])
     print(u"Done...")
     #  --------------------------------------------------------------------------------------------------------------------
-    checkpoint = ModelCheckpoint(filepath="./weights/lstm.hdf5", verbose=0)
-    merged_model.fit([E_L, D_L, E_R, D_R], Y, batch_size=16, epochs=5, validation_split=val_split, callbacks=[checkpoint], verbose=1)
+    checkpoint = ModelCheckpoint(filepath="lstm.hdf5", verbose=0)
+    merged_model.fit([E_L, D_L, E_R, D_R], Y, batch_size=16, epochs=5, callbacks=[checkpoint], verbose=0)
     #  --------------------------------------------------------------------------------------------------------------------
