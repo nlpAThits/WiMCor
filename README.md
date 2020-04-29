@@ -30,6 +30,15 @@ This command generates the annotated samples in XML format.
 3. Run baselines (WIP!)
 
 The scripts are available in the directories `glove/` and `bert/`.
+These script are based on [this](https://github.com/milangritta/Minimalist-Location-Metonymy-Resolution) repository.
+
+First create baseline and prewin pickle files with command: 
+```$ python baseline.py filepath```
+```$ python create_prewin.py filepath```
+
+Then train and test the model using the command:
+```$ python get_results.py -c base -w 5 -d directorypath```
+
 
 ## Cite the paper
 

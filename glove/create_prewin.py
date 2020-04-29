@@ -5,7 +5,7 @@ from spacy.lang.en import English
 import spacy
 import numpy as np
 
-from stats import dump_to_pickle
+from utils import dump_to_pickle
 
 path = sys.argv[1]
 # path = "~/metonymy-resolution/harvest-data/disambiguation-pages/corpora/new-corpora/prewin-multi/wiki_LOCATION_train.txt"  # Input file name.
@@ -99,4 +99,4 @@ for line in inp:
     # print(label)
     # print(line[1])
 print("Processed:{} lines/sentences.".format(len(out)))
-dump_to_pickle("{}/pickle/{}.pkl".format(dirname, rawname), out)
+dump_to_pickle("{}/glove_pickle/{}.pkl".format(dirname, rawname), out)
