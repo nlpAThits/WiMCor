@@ -30,7 +30,7 @@ This command generates the annotated samples in XML format.
 3. Run baselines (WIP!)
 
 The scripts are available in the directories `glove/` and `bert/`.
-These script are based on [this](https://github.com/milangritta/Minimalist-Location-Metonymy-Resolution) repository.
+These scripts are based on [Minimalist Location Metonymy Resolution](https://github.com/milangritta/Minimalist-Location-Metonymy-Resolution)  published at ACL 2017.
 
 First create pickle files for each annotated file with the command:
 
