@@ -32,7 +32,7 @@ Then generate samples using the command:
 where `directory` denotes the directory having the output of list of metonymic pairs processed by `process-pairs.sh`.
 This command generates the annotated samples in XML format.
 
-3. Run GloVe and BERT baselines
+2. Run GloVe and BERT baselines
 
 The scripts are available in the directories `glove/` and `bert/`.
 These scripts are based on [Minimalist Location Metonymy Resolution](https://github.com/milangritta/Minimalist-Location-Metonymy-Resolution)  published at ACL 2017.
