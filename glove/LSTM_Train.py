@@ -28,12 +28,12 @@ def train(choice, dirname, window):
     print("Dimensionality:", dimensionality)
     regex = re.compile(r"[+-.]?\d+[-.,\d+:]*(th|st|nd|rd)?")
 
-    if choice=='base':
-        base = '_base'
+    if choice=='imm':
+        base = '_imm'
     else:
         base = ''
     style = 'test'
-    mlmr_dir = '{}/glove_pickle'.format(dirname)
+    mlmr_dir = dirname
     seq_length = window  # Adjust to 5 for PreWin and 5, 10, 50 for baseline results
 
     neg = load_from_pickle("{}/wiki_LOCATION_{}{}.pkl".format(mlmr_dir, style, base))

@@ -19,12 +19,6 @@ def locate_entity(document, ent, left_w, right_w):
     raise Exception()  # If this is ever triggered, there are problems parsing the text. Check SpaCy output!
 
 
-def find_start(old):
-    while old.dep_ == "conj":
-        old = old.head
-    return old.head
-
-
 def pad(coll, from_left, seq_length):
     while len(coll) < seq_length:
         if from_left:
@@ -33,7 +27,7 @@ def pad(coll, from_left, seq_length):
             coll += [u"0.0"]
     return coll
 
-def prewin(path):
+def imm(path):
     dirname = os.path.dirname(path)
     name = os.path.basename(path)
     rawname = os.path.splitext(name)[0] # without extension
@@ -60,40 +54,24 @@ def prewin(path):
     # Germany<SEP>Their privileges as permanent Security Council members, especially the right of veto, 
     # had been increasingly questioned by <ENT>Germany<ENT> and Japan which, as major economic powers.
     out = []
-    seq_length = 5  # A window of 5 is the DEFAULT for the PUBLICATION methodology. Feel free to experiment.
+    seq_length = 50  # There are THREE baselines in the paper (5, 10, 50) so use this integer to set it.
 
     for line in inp:
         line = line.split(u"<SEP>")
         sentence = line[1].split(u"<ENT>")
         entity = [t.text for t in tokenizer(sentence[1])]
         en_doc = en_nlp(u"".join(sentence).strip())
-        left = seq_length * [u"0.0"]
-        right = seq_length * [u"0.0"]
-        dep_left = seq_length * [u"0.0"]
-        dep_right = seq_length * [u"0.0"]
         words = []
         index = locate_entity(en_doc, entity, tokenizer(sentence[0].strip()), tokenizer(sentence[2].strip()))
-        start = find_start(en_doc[index])
-        if start.i > index:
-            if index + 1 < len(en_doc) and en_doc[index + 1].dep_ in [u"case", u"compound", u"amod"] \
-                    and en_doc[index + 1].head == en_doc[index]:  # any neighbouring word that links to it
-                right = pad([en_doc[index + 1].text] + [t.text for t in en_doc[start.i:][:seq_length - 1]], False, seq_length)
-                dep_right = pad([en_doc[index + 1].dep_] + [t.dep_ for t in en_doc[start.i:]][:seq_length - 1], False, seq_length)
-            else:
-                right = pad([t.text for t in en_doc[start.i:][:seq_length]], False, seq_length)
-                dep_right = pad([t.dep_ for t in en_doc[start.i:]][:seq_length], False, seq_length)
-        else:
-            if index - len(entity) >= 0 and en_doc[index - len(entity)].dep_ in [u"case", u"compound", u"amod"] \
-                    and en_doc[index - len(entity)].head == en_doc[index]:  # any neighbouring word that links to it
-                left = pad([t.text for t in en_doc[:start.i + 1][-(seq_length - 1):]] + [en_doc[index - len(entity)].text], True, seq_length)
-                dep_left = pad([t.dep_ for t in en_doc[:start.i + 1]][-(seq_length - 1):] + [en_doc[index - len(entity)].dep_], True, seq_length)
-            else:
-                left = pad([t.text for t in en_doc[:start.i + 1][-seq_length:]], True, seq_length)
-                dep_left = pad([t.dep_ for t in en_doc[:start.i + 1]][-seq_length:], True, seq_length)
+        start = en_doc[index]
+        right = pad([t.text for t in en_doc[start.i + 1:][:seq_length]], False, seq_length)
+        dep_right = pad([t.dep_ for t in en_doc[start.i + 1:]][:seq_length], False, seq_length)
+        left = pad([t.text for t in en_doc[:index - len(entity) + 1][-seq_length:]], True, seq_length)
+        dep_left = pad([t.dep_ for t in en_doc[:index - len(entity) + 1]][-seq_length:], True, seq_length)
         out.append((left, dep_left, right, dep_right, label))
         # print(left, right)
         # print(dep_left, dep_right)
         # print(label)
         # print(line[1])
     print("Processed:{} lines/sentences.".format(len(out)))
-    dump_to_pickle("{}/glove_pickles/{}.pkl".format(dirname, rawname), out)
+    dump_to_pickle("{}/glove_pickles/{}_imm.pkl".format(dirname, rawname), out)

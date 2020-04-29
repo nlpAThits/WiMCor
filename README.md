@@ -32,13 +32,15 @@ This command generates the annotated samples in XML format.
 The scripts are available in the directories `glove/` and `bert/`.
 These script are based on [this](https://github.com/milangritta/Minimalist-Location-Metonymy-Resolution) repository.
 
-First create baseline and prewin pickle files with command: 
-```$ python baseline.py filepath```
-```$ python create_prewin.py filepath```
+First create pickle files for each annotated file with the command:
 
-Then train and test the model using the command:
-```$ python get_results.py -c base -w 5 -d directorypath```
+```$ python get_pickle.py -c imm -f filepath```
 
+Then train and test the LSTM model using the command:
+
+```$ python get_results.py -c imm -w 5 -d directorypath```
+
+where `directorypath` denotes the path to the directory containing the pickle files. Repeat the same for prewin as well. We have provided a few annotated files alongside to play with.
 
 ## Cite the paper
 
