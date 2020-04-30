@@ -44,7 +44,7 @@ Then train and test the LSTM model using the command:
 
 ```$ python get_results.py -c imm -w 5 -d directorypath```
 
-where `directorypath` denotes the path to the directory containing the pickle files. Repeat the same for PreWin for each word embedding. We have provided a few annotated files alongside to play with. We use [pytorch-pretrained-bert](https://github.com/huggingface/transformers) v0.4.0 for generating BERT embeddings.
+where `directorypath` denotes the path to the directory containing the pickle files. Repeat the same for PreWin for each word embedding. We have provided a few annotated files alongside to play with. Check [Minimalist Location Metonymy Resolution](https://github.com/milangritta/Minimalist-Location-Metonymy-Resolution) on how get GloVe embeddings. We use [pytorch-pretrained-bert](https://github.com/huggingface/transformers) v0.4.0 for generating BERT embeddings.
 
 ## Cite the paper
 
