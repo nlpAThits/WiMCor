@@ -3,3 +3,4 @@ mwparserfromhell==0.5.4
 beautifulsoup4==4.6.0
 sparqlwrapper==1.6.4
 spacy==2.2.3
+keras==2.2.4

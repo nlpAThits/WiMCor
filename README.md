@@ -32,10 +32,9 @@ Then generate samples using the command:
 where `directory` denotes the directory having the output of list of metonymic pairs processed by `process-pairs.sh`.
 This command generates the annotated samples in XML format.
 
-2. Run GloVe and BERT baselines
+2. Run IMM and PreWin baselines
 
-The scripts are available in the directories `glove/` and `bert/`.
-These scripts are based on [Minimalist Location Metonymy Resolution](https://github.com/milangritta/Minimalist-Location-Metonymy-Resolution)  published at ACL 2017.
+The baseline implementation is based on [Minimalist Location Metonymy Resolution](https://github.com/milangritta/Minimalist-Location-Metonymy-Resolution)  published at ACL 2017. The scripts are available in the directories `glove/` and `bert/`.
 
 First create pickle files for each annotated file with the command:
 
@@ -45,7 +44,7 @@ Then train and test the LSTM model using the command:
 
 ```$ python get_results.py -c imm -w 5 -d directorypath```
 
-where `directorypath` denotes the path to the directory containing the pickle files. Repeat the same for prewin as well. We have provided a few annotated files alongside to play with.
+where `directorypath` denotes the path to the directory containing the pickle files. Repeat the same for PreWin for each word embedding. We have provided a few annotated files alongside to play with. We use [pytorch-pretrained-bert](https://github.com/huggingface/transformers) v0.4.0 for generating BERT embeddings.
 
 ## Cite the paper
 
