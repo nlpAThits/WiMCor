@@ -96,4 +96,4 @@ def prewin(path):
         # print(label)
         # print(line[1])
     print("Processed:{} lines/sentences.".format(len(out)))
-    dump_to_pickle("{}/glove_pickles/{}.pkl".format(dirname, rawname), out)
+    dump_to_pickle("{}/glove_pickles/{}_prewin.pkl".format(dirname, rawname), out)

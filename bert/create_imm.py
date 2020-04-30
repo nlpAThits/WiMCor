@@ -177,4 +177,4 @@ def imm(path):
         #print(label)
         #print(line[1])
     print("Processed:{} lines/sentences.".format(len(out)))
-    dump_to_hdf5("{}/bert_pickles/{}_base.hdf5".format(dirname, rawname), out)
+    dump_to_hdf5("{}/bert_pickles/{}_imm.hdf5".format(dirname, rawname), out)

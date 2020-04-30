@@ -27,7 +27,7 @@ def test(choice, dirname, window):
     if choice=='imm':
         base = '_imm'
     elif choice=='prewin':
-        base = ''
+        base = '_prewin'
     style = 'test'
     mlmr_dir = dirname
     seq_length = window  # Adjust to 5 for PreWin and 5, 10, 50 for baseline results
